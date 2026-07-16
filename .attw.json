@@ -1,0 +1,5 @@
+{
+    "format": "auto",
+    "pack": true,
+    "profile": "esm-only"
+}

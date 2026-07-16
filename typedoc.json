@@ -1,0 +1,11 @@
+{
+    "$schema": "https://typedoc.org/schema.json",
+    "entryPoints": [
+        "src/editorconfig.ts",
+        "src/cli.ts"
+    ],
+    "extends": [
+        "typedoc-config-nick2bad4u"
+    ],
+    "out": "docs/api"
+}

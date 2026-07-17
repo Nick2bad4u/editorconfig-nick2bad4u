@@ -10,6 +10,13 @@ import {
 const usage =
     "Usage: editorconfig-nick2bad4u init [options]\n\nOptions:\n  --preset <name>  four-space, two-space, tabs, or minimal\n  --force          replace an existing .editorconfig\n  --dry-run        report whether the file would change\n  --stdout         print the selected template without writing\n  --help           show this help\n";
 
+interface EditorConfigCliOptions {
+    readonly dryRun: boolean;
+    readonly force: boolean;
+    readonly preset: EditorConfigPreset;
+    readonly stdout: boolean;
+}
+
 /** Run the package CLI and return an exit status. */
 export async function runEditorConfigCli(
     args: readonly string[],
@@ -25,6 +32,42 @@ export async function runEditorConfigCli(
         return 2;
     }
 
+    const options = parseEditorConfigOptions(args);
+    if (!isDefined(options)) return 2;
+
+    if (options.stdout) {
+        process.stdout.write(await readEditorConfigPreset(options.preset));
+        return 0;
+    }
+
+    try {
+        const result = await installEditorConfig({
+            cwd,
+            dryRun: options.dryRun,
+            force: options.force,
+            preset: options.preset,
+        });
+        const verb = getResultVerb(options.dryRun, result.written);
+        process.stdout.write(
+            `${verb}: ${result.targetPath} (${options.preset})\n`
+        );
+        return 0;
+    } catch (error: unknown) {
+        // eslint-disable-next-line unicorn/prefer-error-is-error -- Error.isError conflicts with the repository's no-extended-native rule
+        const message = error instanceof Error ? error.message : String(error);
+        process.stderr.write(`${message}\n`);
+        return 1;
+    }
+}
+
+function getResultVerb(isDryRun: boolean, isWritten: boolean): string {
+    if (isDryRun) return "would update";
+    return isWritten ? "installed" : "already matches";
+}
+
+function parseEditorConfigOptions(
+    args: readonly string[]
+): EditorConfigCliOptions | undefined {
     let preset: EditorConfigPreset = "four-space";
     let isForce = false;
     let isDryRun = false;
@@ -46,7 +89,7 @@ export async function runEditorConfigCli(
                 process.stderr.write(
                     `Invalid preset. Expected one of: ${arrayJoin(editorConfigPresets, ", ")}.\n`
                 );
-                return 2;
+                return undefined;
             }
             preset = candidate;
             index += 1;
@@ -54,34 +97,14 @@ export async function runEditorConfigCli(
             isStdout = true;
         } else {
             process.stderr.write(`Unknown option: ${String(argument)}\n`);
-            return 2;
+            return undefined;
         }
     }
 
-    if (isStdout) {
-        process.stdout.write(await readEditorConfigPreset(preset));
-        return 0;
-    }
-
-    try {
-        const result = await installEditorConfig({
-            cwd,
-            dryRun: isDryRun,
-            force: isForce,
-            preset,
-        });
-        const verb = getResultVerb(isDryRun, result.written);
-        process.stdout.write(`${verb}: ${result.targetPath} (${preset})\n`);
-        return 0;
-    } catch (error: unknown) {
-        // eslint-disable-next-line unicorn/prefer-error-is-error -- Error.isError conflicts with the repository's no-extended-native rule
-        const message = error instanceof Error ? error.message : String(error);
-        process.stderr.write(`${message}\n`);
-        return 1;
-    }
-}
-
-function getResultVerb(isDryRun: boolean, isWritten: boolean): string {
-    if (isDryRun) return "would update";
-    return isWritten ? "installed" : "already matches";
+    return {
+        dryRun: isDryRun,
+        force: isForce,
+        preset,
+        stdout: isStdout,
+    };
 }

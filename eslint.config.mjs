@@ -18,8 +18,10 @@ const config = [
     {
         files: ["src/bin.ts"],
         rules: {
-            // The published dist/bin.js is the package executable.
+            // The built file is executed directly under the supported Node versions;
+            // it is not imported as a library module.
             "n/hashbang": "off",
+            "n/no-top-level-await": "off",
         },
     },
     {

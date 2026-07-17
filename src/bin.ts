@@ -2,7 +2,4 @@
 
 import { runEditorConfigCli } from "./cli.js";
 
-void runEditorConfigCli(process.argv.slice(2)).then((status) => {
-    process.exitCode = status;
-    return status;
-});
+process.exitCode = await runEditorConfigCli(process.argv.slice(2));

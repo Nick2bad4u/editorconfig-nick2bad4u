@@ -1,7 +1,7 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
     "name": "editorconfig-nick2bad4u",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "private": false,
     "description": "Safe EditorConfig template installer with four-space, two-space, tabs, and minimal presets.",
     "keywords": [

@@ -126,7 +126,7 @@
         "editorconfig": "^3.0.1",
         "editorconfig-checker": "^6.1.1",
         "eslint": "^10.7.0",
-        "eslint-config-nick2bad4u": "^7.0.0",
+        "eslint-config-nick2bad4u": "^15.0.0",
         "git-cliff": "^2.13.1",
         "gitcliff-config-nick2bad4u": "^1.4.0",
         "gitleaks-config-nick2bad4u": "^1.0.4",
